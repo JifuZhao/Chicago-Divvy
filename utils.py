@@ -4,7 +4,7 @@
 __author__  =   "Jifu Zhao"
 __email__   =   "jzhao59@illinois.edu"
 __date__    =   "02/20/2018"
-__update__  =   "02/23/2018"
+__update__  =   "02/24/2018"
 """
 
 import pandas as pd
@@ -34,9 +34,10 @@ def query_weather(key, year, state='IL', area='Chicago'):
     events = []
     rain = []
     conditions = []
+    errors = []
 
     # query data for each month
-    for month in range(1, 2):
+    for month in range(1, 13):
         # get the number of days at the given month
         num_days = calendar.monthrange(year, month)[1]
 
@@ -52,32 +53,38 @@ def query_weather(key, year, state='IL', area='Chicago'):
             if day < 10:
                 day_str = '0' + day_str
 
-            # query the weather information
-            link = url.format(key=key, year=year_str, month=month_str,
-                              day=day_str, state=state, area=area)
-            weather = requests.get(link).json()['history']['observations']
+            try:
+                # query the weather information
+                link = url.format(key=key, year=year_str, month=month_str,
+                                  day=day_str, state=state, area=area)
+                weather = requests.get(link).json()['history']['observations']
 
-            # add new data to list
-            for i in range(len(weather)):
-                date = weather[i]['date']['year'] + '-' \
-                    + weather[i]['date']['mon'] + '-' \
-                    + weather[i]['date']['mday'] + '-' \
-                    + weather[i]['date']['hour'] + ':' \
-                    + weather[i]['date']['min'] + ':00'
-                date_list.append(date)
-                temperature.append(weather[i]['tempi'])
-                wind_chill.append(weather[i]['windchilli'])
-                dewpoint.append(weather[i]['dewpti'])
-                humidity.append(weather[i]['hum'])
-                pressure.append(weather[i]['pressurei'])
-                visibility.append(weather[i]['visi'])
-                wind_speed.append(weather[i]['wspdi'])
-                precipitation.append(weather[i]['precipi'])
-                events.append(weather[i]['icon'])
-                rain.append(weather[i]['rain'])
-                conditions.append(weather[i]['conds'])
-
-            time.sleep(6)
+                # add new data to list
+                for i in range(len(weather)):
+                    try:
+                        date = weather[i]['date']['year'] + '-' \
+                            + weather[i]['date']['mon'] + '-' \
+                            + weather[i]['date']['mday'] + '-' \
+                            + weather[i]['date']['hour'] + ':' \
+                            + weather[i]['date']['min'] + ':00'
+                        date_list.append(date)
+                        temperature.append(weather[i]['tempi'])
+                        wind_chill.append(weather[i]['windchilli'])
+                        dewpoint.append(weather[i]['dewpti'])
+                        humidity.append(weather[i]['hum'])
+                        pressure.append(weather[i]['pressurei'])
+                        visibility.append(weather[i]['visi'])
+                        wind_speed.append(weather[i]['wspdi'])
+                        precipitation.append(weather[i]['precipi'])
+                        events.append(weather[i]['icon'])
+                        rain.append(weather[i]['rain'])
+                        conditions.append(weather[i]['conds'])
+                    except:
+                        errors.append((month, day, i))
+                        continue
+                time.sleep(6)
+            except:
+                errors.append((month, day))
 
     # transform to DataFrame
     Dict = {'date': date_list, 'temperature': temperature,
@@ -92,4 +99,4 @@ def query_weather(key, year, state='IL', area='Chicago'):
                'events', 'rain', 'conditions']
     df = pd.DataFrame(data=Dict, columns=columns)
 
-    return df
+    return df, errors
