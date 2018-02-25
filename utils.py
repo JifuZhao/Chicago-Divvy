@@ -8,6 +8,7 @@ __update__  =   "02/24/2018"
 """
 
 import pandas as pd
+import numpy as np
 import requests
 import calendar
 import time
@@ -61,27 +62,23 @@ def query_weather(key, year, state='IL', area='Chicago'):
 
                 # add new data to list
                 for i in range(len(weather)):
-                    try:
-                        date = weather[i]['date']['year'] + '-' \
-                            + weather[i]['date']['mon'] + '-' \
-                            + weather[i]['date']['mday'] + '-' \
-                            + weather[i]['date']['hour'] + ':' \
-                            + weather[i]['date']['min'] + ':00'
-                        date_list.append(date)
-                        temperature.append(weather[i]['tempi'])
-                        wind_chill.append(weather[i]['windchilli'])
-                        dewpoint.append(weather[i]['dewpti'])
-                        humidity.append(weather[i]['hum'])
-                        pressure.append(weather[i]['pressurei'])
-                        visibility.append(weather[i]['visi'])
-                        wind_speed.append(weather[i]['wspdi'])
-                        precipitation.append(weather[i]['precipi'])
-                        events.append(weather[i]['icon'])
-                        rain.append(weather[i]['rain'])
-                        conditions.append(weather[i]['conds'])
-                    except:
-                        errors.append((month, day, i))
-                        continue
+                    date = weather[i]['date']['year'] + '-' \
+                        + weather[i]['date']['mon'] + '-' \
+                        + weather[i]['date']['mday'] + '-' \
+                        + weather[i]['date']['hour'] + ':' \
+                        + weather[i]['date']['min'] + ':00'
+                    date_list.append(date)
+                    temperature.append(weather[i]['tempi'])
+                    wind_chill.append(weather[i]['windchilli'])
+                    dewpoint.append(weather[i]['dewpti'])
+                    humidity.append(weather[i]['hum'])
+                    pressure.append(weather[i]['pressurei'])
+                    visibility.append(weather[i]['visi'])
+                    wind_speed.append(weather[i]['wspdi'])
+                    precipitation.append(weather[i]['precipi'])
+                    events.append(weather[i]['icon'])
+                    rain.append(weather[i]['rain'])
+                    conditions.append(weather[i]['conds'])
                 time.sleep(6)
             except:
                 errors.append((month, day))
@@ -100,3 +97,60 @@ def query_weather(key, year, state='IL', area='Chicago'):
     df = pd.DataFrame(data=Dict, columns=columns)
 
     return df, errors
+
+
+def merge(trip, station, weather):
+    """ function to merge trip, station, and weather information """
+    trip = trip[['trip_id', 'usertype', 'gender', 'starttime', 'stoptime',
+                 'tripduration', 'from_station_id', 'from_station_name',
+                 'to_station_id', 'to_station_name']]
+    station = station[['id', 'latitude', 'longitude', 'dpcapacity']]
+
+    # merge trip with station information
+    trip_start = pd.merge(left=trip, right=station, how='left',
+                          left_on='from_station_id', right_on='id')
+    trip_station = pd.merge(left=trip_start, right=station, how='left',
+                            left_on='to_station_id', right_on='id',
+                            suffixes=('_start', '_end'))
+
+    columns = ['trip_id', 'usertype', 'gender', 'starttime', 'stoptime',
+               'tripduration', 'from_station_id', 'from_station_name',
+               'latitude_start', 'longitude_start', 'dpcapacity_start',
+               'to_station_id', 'to_station_name', 'latitude_end',
+               'longitude_end', 'dpcapacity_end']
+    trip_station = trip_station[columns]
+
+    # extract weather month, day, hour information
+    weather_date = np.array(list(map(lambda x: (x.month, x.day, x.hour),
+                                     weather['date'])))
+    weather['month'] = weather_date[:, 0]
+    weather['day'] = weather_date[:, 1]
+    weather['hour'] = weather_date[:, 2]
+
+    # drop duplicates, keep the first
+    weather = weather.drop_duplicates(subset=['month', 'day', 'hour'])
+    weather = weather[['month', 'day', 'hour', 'temperature', 'windchill',
+                       'dewpoint', 'humidity', 'pressure', 'visibility',
+                       'wind_speed', 'precipitation', 'events', 'rain',
+                       'conditions']]
+
+    # extract trip month, day, hour information
+    trip_date = np.array(list(map(lambda x: (x.month, x.day, x.hour),
+                                  trip_station['starttime'])))
+    trip_station['month'] = trip_date[:, 0]
+    trip_station['day'] = trip_date[:, 1]
+    trip_station['hour'] = trip_date[:, 2]
+
+    # merge trip with weather information
+    merged = pd.merge(left=trip_station, right=weather,
+                      on=['month', 'day', 'hour'], how='inner')
+    merged = merged[['trip_id', 'usertype', 'gender', 'starttime', 'stoptime',
+                     'tripduration', 'from_station_id', 'from_station_name',
+                     'latitude_start', 'longitude_start', 'dpcapacity_start',
+                     'to_station_id', 'to_station_name', 'latitude_end',
+                     'longitude_end', 'dpcapacity_end', 'temperature',
+                     'windchill', 'dewpoint', 'humidity', 'pressure',
+                     'visibility', 'wind_speed', 'precipitation', 'events',
+                     'rain', 'conditions']]
+
+    return merged
