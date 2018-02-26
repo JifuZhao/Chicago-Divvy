@@ -1,5 +1,5 @@
 # Chicago_Divvy
-Chicago Divvy Bike Share Data Analysis and Modeling
+Chicago Divvy Bike Share Data Visualization and Analysis
 
 ## Bicycle Data: [Chicago Divvy System Data](https://www.divvybikes.com/system-data)
 The website contains the data from 2013 to 2017. This notebook only conducts analysis on data from 2014 to 2017.
@@ -7,7 +7,10 @@ The website contains the data from 2013 to 2017. This notebook only conducts ana
 ## Weather Data: [Wunderground.com](https://www.wunderground.com/)
 The website provides free API for you to download various weather information. In this project, temperature and weather conditions are the main information used.
 
-## Analysis and Modeling
+### Note:
+To download the data, you can go to Kaggle to download: [https://www.kaggle.com/yingwurenjian/chicago-divvy-bicycle-sharing-data](https://www.kaggle.com/yingwurenjian/chicago-divvy-bicycle-sharing-data)
+
+## Visualization and Analysis
 This notebook contains a series visualization and modeling, please refer to the Jupyter Notebook for details.
 
 ### Note:
