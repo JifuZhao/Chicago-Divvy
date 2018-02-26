@@ -16,6 +16,6 @@ To download the data, you can go to Kaggle to download: [https://www.kaggle.com/
 This notebook contains a series visualization and modeling, please refer to the Jupyter Notebook for details.
 
 ### Note:
-Detailed analysis can be found in my [blog](https://jifuzhao.github.io/2018/03/10/divvy.html). Feel free to read through it.
+Detailed analysis can be found in my [Blog](https://jifuzhao.github.io/2018/02/26/divvy.html). Feel free to read through it.
 
 I have processed the data and query all the weather information, if you need the data or if you have any questions, feel free to contact me.
