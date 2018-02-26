@@ -1,5 +1,7 @@
 # Chicago_Divvy
+
 Chicago Divvy Bike Share Data Visualization and Analysis
+![image]('/result/divvy.png')
 
 ## Bicycle Data: [Chicago Divvy System Data](https://www.divvybikes.com/system-data)
 The website contains the data from 2013 to 2017. This notebook only conducts analysis on data from 2014 to 2017.
