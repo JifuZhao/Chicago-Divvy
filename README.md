@@ -1,4 +1,4 @@
-<img src="./result/divvy.png" width=200px>
+<img src="./result/divvy.png" width=400px>
 
 # Chicago_Divvy
 Chicago Divvy Bike Share Data Visualization and Analysis
